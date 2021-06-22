@@ -1,80 +1,70 @@
-<!-- Copyright 2022 Google LLC
+# Terraform Online Boutique demo
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+## Overview
 
-http://www.apache.org/licenses/LICENSE-2.0
+This Terraform template deploys the Online Boutique [microservices demo](https://github.com/GoogleCloudPlatform/microservices-demo) using Terraform. The original Google project was forked and the `terraform` folder was added.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License. -->
+The template creates a VPC network, a GKE cluster and deploys the application using the deployment description from the original project. This makes this project very easy to keep up to date.
 
-# Use Terraform to deploy Online Boutique on a GKE cluster
+The GKE cluster will put nodes, pods and services in different networks which are configurable. The minimum and maximum number of nodes in the node pool is also configurable.
 
-This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine) cluster using Terraform.
+## Pre-Requisites
 
-## Prerequisites
+You will need to have the [gcloud CLI](https://cloud.google.com/sdk/gcloud) and Terraform installed. To quickly get started you can also just use [Google Cloud Shell](https://shell.cloud.google.com).
 
-1. [Create a new project or use an existing project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console) on Google Cloud Platform (GCP), and ensure [billing is enabled](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled) on the project.
+The Terraform template uses:
+* [Terraform 1.0.0](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability)
+* [Google Cloud Platform Provider 3.72.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
+* [Gavin Bunney's kubectl Provider 1.11.1](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs)
 
-## Deploy the sample application
+## Terraform Variables
 
-1. Clone the Github repository.
-    ```
-    git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
-    ```
+The following variables are defined in `variables.tf`.
 
-1. Move into the `terraform/` directory which contains the Terraform installation scripts.
-    ```
-    cd microservices-demo/terraform
-    ```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `app_name` | Application name | "onlineboutique" |
+| `project_id` | GCP project id | |
+| `region` | GCP region | |
+| `machine_type` |  Machine type for cluster nodes | "e2-standard-2" |
+| `min_node_count` | Minimum number of GKE nodes per zone | 1 |
+| `max_node_count` | Maximum number of GKE nodes per zone | 2 |
+| `gke_nodes_cidr` | CIDR range for the GKE Nodes subnet | "10.0.0.0/16" |
+| `gke_pods_cidr` | CIDR range for the GKE Pods subnet | "10.1.0.0/16" |
+| `gke_services_cidr` | CIDR range for the GKE Services subnet | "10.2.0.0/16" |
 
-1. Open the `terraform.tfvars` file and replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable.
+## Using the Template
 
-1. (Optional) If you want to provision a [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore) instance, you can change the value of `memorystore = false` to `memorystore = true` in this `terraform.tfvars` file.
+Clone the project and change to the `terraform` folder,
+```sh
+git clone https://github.com/compalmanel/microservices-demo.git
+cd microservices-demo/terraform
+```
 
-1. Initialize Terraform.
-    ```
-    terraform init
-    ```
+Set your Cloud Platform project,
+```sh
+gcloud config set project [project_id]
+```
 
-1. See what resources will be created.
-    ```
-    terraform plan
-    ```
+Initialize Terraform,
+```sh
+terraform init
+```
 
-1. Create the resources and deploy the sample.
-    ```
-    terraform apply
-    ```
+Make sure you uodate `terraform.tfvars` with the values for your `project_id` and preferred `region`. You can also override any of the default values for the variables described above.
 
-    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+Plan the deployment,
+```sh
+terraform plan -out "demo.tfplan"
+```
 
-    Note: This step can take about 10 minutes. Do not interrupt the process.
+After reviewing the plan you can apply it,
+```sh
+terraform apply "demo.tfplan"
+```
 
-Once the Terraform script has finished, you can locate the frontend's external IP address to access the sample application.
-
-- Option 1:
-    ```
-    kubectl get service frontend-external | awk '{print $4}'
-    ```
-
-- Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external".
-
-## Clean up
-
-To avoid incurring charges to your Google Cloud account for the resources used in this sample application, either delete the project that contains the resources, or keep the project and delete the individual resources.
-
-To remove the individual resources created for by Terraform without deleting the project:
-
-1. Navigate to the `terraform/` directory.
-
-1. Run the following command:
-    ```
-    terraform destroy
-    ```
-
-    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+After the deployment finishes you will be presented with some data about your cluster. You can retrieve the endpoint for the application as well,
+```sh
+gcloud container clusters get-credentials [app_name] --region [region] --project [project_id]
+kubectl get service frontend-external | awk '{print $4}'
+```
