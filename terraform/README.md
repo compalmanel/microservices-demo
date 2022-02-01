@@ -40,44 +40,6 @@ The following variables are defined in `variables.tf`.
 | `gke_services_cidr` | The IP range in CIDR notation to use for the services network. This range will be used for assigning private IP addresses to services deployed in the cluster. This range must not overlap with any other ranges in use within the cluster's network. | "10.2.0.0/16" |
 | `gke_master_cidr` | The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | "10.3.0.0/28" |
 
-## Using the Template
+## Quickstart
 
-Clone the project and change to the `terraform` folder,
-
-```sh
-git clone https://github.com/compalmanel/microservices-demo.git
-cd microservices-demo/terraform
-```
-
-Set your Cloud Platform project,
-
-```sh
-gcloud config set project [project_id]
-```
-
-Initialize Terraform,
-
-```sh
-terraform init
-```
-
-Make sure you update `terraform.tfvars` with the values for your `project_id` and preferred `region`. You can also override any of the default values for the variables described above.
-
-Plan the deployment,
-
-```sh
-terraform plan -out "demo.tfplan"
-```
-
-After reviewing the plan you can apply it,
-
-```sh
-terraform apply "demo.tfplan"
-```
-
-After the deployment finishes you will be presented with some data about your cluster, and how You can retrieve the endpoint for the application.
-
-```sh
-gcloud container clusters get-credentials [app_name] --region [region] --project [project_id]
-kubectl get service frontend-external | awk '{print $4}'
-```
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/compalmanel/microservices-demo&cloudshell_workspace=.&cloudshell_open_in_editor=terraform/terraform.tfvars&cloudshell_tutorial=terraform/tutorial.md)
