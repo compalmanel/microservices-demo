@@ -64,3 +64,4 @@ variable "gke_master_cidr" {
   default     = "10.3.0.0/28"
   description = "The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. "
 }
+
