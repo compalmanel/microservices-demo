@@ -22,11 +22,12 @@ variable "project_id" {
 }
 
 variable "region" {
+  default     = "us-central1"
   description = "GCP region"
 }
 
 variable "machine_type" {
-  default     = "e2-standard-2"
+  default     = "e2-small"
   description = "Machine type for GKE cluster nodes."
 }
 
@@ -65,3 +66,19 @@ variable "gke_master_cidr" {
   description = "The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. "
 }
 
+variable "namespace" {
+  type        = string
+  description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
+  default     = "default"
+}
+
+variable "filepath_manifest" {
+  type        = string
+  description = "Path to Online Boutique's Kubernetes resources, written using Kustomize"
+  default     = "../kustomize/"
+}
+
+variable "memorystore" {
+  type        = bool
+  description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
+}
