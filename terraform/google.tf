@@ -18,16 +18,25 @@ provider "google" {
   region  = var.region
 }
 
+# Definition of local variables
+locals {
+  base_apis = [
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "monitoring.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "clouddebugger.googleapis.com",
+    "cloudprofiler.googleapis.com"
+  ]
+  memorystore_apis = ["redis.googleapis.com"]
+  activate_apis    = concat(local.base_apis, var.memorystore ? local.memorystore_apis : [])
+}
+
 # Activate the necessary GCP APIs
 resource "google_project_service" "gcp_apis" {
-  for_each                   = toset(["cloudresourcemanager.googleapis.com",
-                                      "compute.googleapis.com",
-                                      "container.googleapis.com",
-                                      "servicenetworking.googleapis.com",
-                                      "monitoring.googleapis.com",
-                                      "cloudtrace.googleapis.com",
-                                      "clouddebugger.googleapis.com",
-                                      "cloudprofiler.googleapis.com"])
+  for_each                   = toset(local.activate_apis)
   project                    = var.project_id
   service                    = each.value
   disable_dependent_services = false

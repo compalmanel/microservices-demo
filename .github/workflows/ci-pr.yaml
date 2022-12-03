@@ -17,6 +17,13 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/README.md'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
@@ -27,10 +34,11 @@ jobs:
         repository: ${{github.event.pull_request.head.repo.full_name}}
     - uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '6.0'
+        dotnet-version: '7.0'
+        include-prerelease: true
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.18'
+        go-version: '1.19'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -71,7 +79,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}

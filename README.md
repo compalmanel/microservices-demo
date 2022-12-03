@@ -1,17 +1,17 @@
 <p align="center">
-<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
+<img src="src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
 </p>
 
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
-**Online Boutique** is a cloud-native microservices demo application.
-Online Boutique consists of a 11-tier microservices application. The application is a
+**Online Boutique** is a cloud-first microservices demo application.
+Online Boutique consists of an 11-tier microservices application. The application is a
 web-based e-commerce app where users can browse items,
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate use of technologies like
-Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. This application
+Kubernetes/GKE, Istio, Stackdriver, and gRPC**. This application
 works on any Kubernetes cluster, as well as Google
 Kubernetes Engine. It’s **easy to deploy with little to no configuration**.
 
@@ -29,18 +29,13 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 ## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_workspace=.&cloudshell_tutorial=docs/cloudshell-tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fmicroservices-demo&shellonly=true&cloudshell_image=gcr.io/ds-artifacts-cloudshell/deploystack_custom_image)
 
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
 ```
 PROJECT_ID="<your-project-id>"
 gcloud services enable container.googleapis.com --project ${PROJECT_ID}
-gcloud services enable monitoring.googleapis.com \
-    cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com \
-    cloudprofiler.googleapis.com \
-    --project ${PROJECT_ID}
 ```
 
 2. **Clone this repository.**
@@ -123,17 +118,22 @@ gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Other Deployment Options
+## Use Terraform to provision a GKE cluster and deploy Online Boutique
 
-- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
-- **Workload Identity**: [See these instructions.](docs/workload-identity.md)
+The [`/terraform` folder](terraform) contains instructions for using [Terraform](https://www.terraform.io/intro) to replicate the steps from [**Quickstart (GKE)**](#quickstart-gke) above.
+
+## Other deployment variations
+
 - **Istio**: [See these instructions.](docs/service-mesh.md)
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
+- **Anthos Service Mesh**: [See these instructions](/docs/service-mesh.md)
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
-- **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
-- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
 
+## Deploy Online Boutique variations with Kustomize
+
+The [`/kustomize` folder](kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
+* integrating with [Google Cloud Operations](kustomize/components/google-cloud-operations/)
+* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](kustomize/components/memorystore) or [Google Cloud Spanner](kustomize/components/spanner)
+* etc.
 
 ## Architecture
 
@@ -167,8 +167,6 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 - **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
 - **[Istio](https://istio.io):** Application works on Istio service mesh.
-- **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
-  instrumented using OpenCensus trace interceptors for gRPC/HTTP.
 - **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing** and **Debugging**. In
   addition to these, using Istio enables features like Request/Response
@@ -186,6 +184,7 @@ If you would like to contribute features or fixes to this app, see the [Developm
 
 ## Demos featuring Online Boutique
 
+- [Seamlessly encrypt traffic from any apps in your Mesh to Memorystore (redis)](https://medium.com/google-cloud/64b71969318d)
 - [From edge to mesh: Exposing service mesh applications through GKE Ingress](https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress)
 - [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
 - [Deploying the Online Boutique sample application on Anthos Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)

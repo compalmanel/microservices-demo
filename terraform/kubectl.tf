@@ -1,4 +1,4 @@
-# Copyright 2021 Paulo Albuquerque
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Get deployment manifests
-data "kubectl_path_documents" "manifests" {
-  pattern          = "${path.module}/../release/kubernetes-manifests.yaml"
-  disable_template = true
+# Get credentials for cluster
+module "gcloud" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 3.0"
+
+  platform              = "linux"
+  additional_components = ["kubectl", "beta"]
+
+  create_cmd_entrypoint = "gcloud"
+  # Use local variable cluster_name for an implicit dependency on resource "google_container_cluster" 
+  create_cmd_body = "container clusters get-credentials ${google_container_cluster.primary.name} --zone=${var.region}"
 }
 
-# Retrieve an access token as the Terraform runner
-data "google_client_config" "provider" {}
+# Apply YAML kubernetes-manifest configurations
+resource "null_resource" "apply_deployment" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl apply -k ${var.filepath_manifest}"
+  }
 
-# Authenticate to the GKE cluster
-provider "kubectl" {
-  load_config_file       = false
-  host                   = "https://${google_container_cluster.primary.endpoint}"
-  token                  = data.google_client_config.provider.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth.0.cluster_ca_certificate)
+  depends_on = [
+    module.gcloud
+  ]
 }
 
-# Apply the application manifests
-resource "kubectl_manifest" "application" {
-  for_each  = toset(data.kubectl_path_documents.manifests.documents)
-  yaml_body = each.value
+# Wait condition for all Pods to be ready before finishing
+resource "null_resource" "wait_conditions" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s 2> /dev/null"
+  }
+
+  depends_on = [
+    resource.null_resource.apply_deployment
+  ]
 }

@@ -19,7 +19,7 @@ resource "google_service_account" "gke_account" {
 }
 
 resource "google_project_iam_member" "gke_account_permissions" {
-  for_each = toset(["roles/logging.logWriter", "roles/monitoring.metricWriter", "roles/monitoring.viewer"])
+  for_each = toset(["roles/container.nodeServiceAccount"])
 
   project = var.project_id
   role    = each.value

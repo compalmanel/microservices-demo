@@ -2,9 +2,9 @@
 
 ## Overview
 
-This Terraform template deploys the Online Boutique [microservices demo](https://github.com/GoogleCloudPlatform/microservices-demo) using Terraform. The original Google project was forked and the `terraform` folder was added.
+This Terraform template deploys the Online Boutique [microservices demo](https://github.com/GoogleCloudPlatform/microservices-demo) using Terraform. The original Google project was forked, and the IaC template in `terraform` folder has been modified to provide a hardened configuration.
 
-The template creates a VPC network, a GKE cluster and deploys the application using the deployment descriptor from the original project. This makes this project very easy to keep up to date.
+The template creates a VPC network, a GKE cluster and deploys the application using the deployment descriptor from the original project. Only the `terraform` folder holds changes from the source repository.
 
 The cluster is created using security good practices:
 
@@ -18,9 +18,8 @@ You will need the [gcloud CLI](https://cloud.google.com/sdk/gcloud) and [Terrafo
 
 The Terraform template uses:
 
-* [Terraform](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability) 1.0.0
-* [Google Cloud Platform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 4.6.0
-* [Gavin Bunney's kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs) 1.13.1
+* [Terraform](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability) ~> 1.3
+* [Google Cloud Platform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) ~> 4.44
 
 ## Terraform Variables
 
@@ -39,6 +38,8 @@ The following variables are defined in `variables.tf`.
 | `gke_pods_cidr` | The IP range in CIDR notation to use for the pods network. This range will be used for assigning private IP addresses to pods deployed in the cluster. This range must not overlap with any other ranges in use within the cluster's network. | "10.1.0.0/16" |
 | `gke_services_cidr` | The IP range in CIDR notation to use for the services network. This range will be used for assigning private IP addresses to services deployed in the cluster. This range must not overlap with any other ranges in use within the cluster's network. | "10.2.0.0/16" |
 | `gke_master_cidr` | The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | "10.3.0.0/28" |
+| `filepath_manifest` | Path to Online Boutique's Kubernetes resources, written using Kustomize | "../kustomize/" |
+| `memorystore` | If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache | |
 
 ## Quickstart
 
